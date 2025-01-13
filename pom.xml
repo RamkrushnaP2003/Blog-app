@@ -93,6 +93,12 @@
 			<artifactId>hibernate-core</artifactId>
 			<version>6.6.4.Final</version> <!-- or the latest stable version of Hibernate 6.x -->
 		</dependency>
+
+		<dependency>
+			<groupId>org.modelmapper</groupId>
+			<artifactId>modelmapper</artifactId>
+			<version>3.1.1</version>
+		</dependency>
 	</dependencies>
 
 	<build>

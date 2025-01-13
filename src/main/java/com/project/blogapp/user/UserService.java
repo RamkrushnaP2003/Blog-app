@@ -1,5 +1,6 @@
 package com.project.blogapp.user;
 
+import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
 import com.project.blogapp.dtos.CreateUserRequest;
@@ -7,18 +8,16 @@ import com.project.blogapp.dtos.CreateUserRequest;
 @Service
 public class UserService {
     private final UserRepository userRepository;
+    private final ModelMapper modelMapper;
 
-    public UserService(UserRepository userRepository) {
+    public UserService(UserRepository userRepository, ModelMapper modelMapper) {
         this.userRepository = userRepository;
+        this.modelMapper = modelMapper;
     }
 
     public UserEntity createUser(CreateUserRequest req) {
-        var newUser = UserEntity.builder()
-            .username(req.getUsername())
-            .password(req.getPassword())  // TODO : encrypt password
-            .email(req.getEmail())
-            .build();
-
+        UserEntity newUser = modelMapper.map(req, UserEntity.class);
+        // TODO: encrypt and save password
         return userRepository.save(newUser);
     }
 
