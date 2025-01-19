@@ -1,6 +1,9 @@
 package com.project.blogapp.user;
 
+import java.util.*;
+
 import org.modelmapper.ModelMapper;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.project.blogapp.dtos.CreateUserRequest;
@@ -9,15 +12,23 @@ import com.project.blogapp.dtos.CreateUserRequest;
 public class UserService {
     private final UserRepository userRepository;
     private final ModelMapper modelMapper;
+    private final PasswordEncoder passwordEncoder;
 
-    public UserService(UserRepository userRepository, ModelMapper modelMapper) {
+    public UserService(UserRepository userRepository, ModelMapper modelMapper, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.modelMapper = modelMapper;
+        this.passwordEncoder = passwordEncoder;
+    }
+
+    public List<UserEntity> getAllUsers() {
+        List<UserEntity> users = new ArrayList<>();
+        users = userRepository.findAll();
+        return users;
     }
 
     public UserEntity createUser(CreateUserRequest req) {
         UserEntity newUser = modelMapper.map(req, UserEntity.class);
-        // TODO: encrypt and save password
+        newUser.setPassword(passwordEncoder.encode(req.getPassword()));
         return userRepository.save(newUser);
     }
 
@@ -31,7 +42,10 @@ public class UserService {
 
     public UserEntity loginUser(String username, String password) {
         var user = userRepository.findUserByUsername(username).orElseThrow(() -> new UserNotFoundException(username));
-        // TODO : check the password
+        boolean passMatch= passwordEncoder.matches(password, user.getPassword());
+        if(!passMatch) {
+            throw new InvalidCreditialsException();
+        }
         return user;
     }
 
@@ -43,5 +57,11 @@ public class UserService {
         public UserNotFoundException(Long authorId) {
             super("User with id: " + authorId + " Not Found");
         }
+    }
+
+    public class InvalidCreditialsException extends IllegalArgumentException {
+        public InvalidCreditialsException() {
+            super("Invalid username or password combination");
+        }        
     }
 }
